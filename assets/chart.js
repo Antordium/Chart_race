@@ -1,200 +1,5 @@
-class BarChartRace {
-    constructor(containerId, options = {}) {
-        this.container = d3.select(containerId);
-        this.options = {
-            animationDuration: 1000,
-            yearDuration: 3000,
-            maxBars: 10,
-            minBars: 5,
-            colors: ['#0078d4', '#00bcf2', '#40e0d0', '#7b68ee', '#ff6b6b', '#ffd93d', '#6bcf7f', '#ff8c42', '#ff6b9d', '#c44569'],
-            ...options
-        };
-        
-        this.data = [];
-        this.years = [];
-        this.currentYearIndex = 0;
-        this.isPlaying = false;
-        this.animationTimer = null;
-        
-        this.initializeChart();
-        this.generateSampleData();
-        this.setupEventListeners();
-    }
-
-    initializeChart() {
-        // Get container dimensions
-        const containerNode = this.container.node();
-        this.width = containerNode.clientWidth;
-        this.height = containerNode.clientHeight;
-        
-        // Set up margins
-        this.margin = { top: 100, right: 200, bottom: 120, left: 80 };
-        this.chartWidth = this.width - this.margin.left - this.margin.right;
-        this.chartHeight = this.height - this.margin.top - this.margin.bottom;
-        
-        // Create SVG
-        this.svg = this.container.select('.chart-svg')
-            .attr('width', this.width)
-            .attr('height', this.height);
-        
-        // Create chart group
-        this.chartGroup = this.svg.append('g')
-            .attr('transform', `translate(${this.margin.left},${this.margin.top})`);
-        
-        // Create scales
-        this.xScale = d3.scaleLinear()
-            .range([0, this.chartWidth - 150]); // Reserve space for images and labels
-        
-        this.yScale = d3.scaleBand()
-            .range([0, this.chartHeight])
-            .padding(0.1);
-        
-        // Hide loading
-        this.container.select('.loading').style('display', 'none');
-    }
-
-    generateSampleData() {
-        // Sample organizations with placeholder images
-        const organizations = [
-            { name: 'TechCorp', image: 'https://via.placeholder.com/40x40/0078d4/ffffff?text=TC' },
-            { name: 'InnovateLabs', image: 'https://via.placeholder.com/40x40/00bcf2/ffffff?text=IL' },
-            { name: 'DataSystems', image: 'https://via.placeholder.com/40x40/40e0d0/ffffff?text=DS' },
-            { name: 'CloudTech', image: 'https://via.placeholder.com/40x40/7b68ee/ffffff?text=CT' },
-            { name: 'AI Solutions', image: 'https://via.placeholder.com/40x40/ff6b6b/ffffff?text=AI' },
-            { name: 'RoboticsCorp', image: 'https://via.placeholder.com/40x40/ffd93d/000000?text=RC' },
-            { name: 'GreenEnergy', image: 'https://via.placeholder.com/40x40/6bcf7f/ffffff?text=GE' },
-            { name: 'BioMedical', image: 'https://via.placeholder.com/40x40/ff8c42/ffffff?text=BM' },
-            { name: 'SpaceX Plus', image: 'https://via.placeholder.com/40x40/ff6b9d/ffffff?text=SP' },
-            { name: 'QuantumTech', image: 'https://via.placeholder.com/40x40/c44569/ffffff?text=QT' }
-        ];
-
-        // Generate data for years 2020-2025
-        this.years = [];
-        const currentYear = new Date().getFullYear();
-        for (let year = 2020; year <= currentYear; year++) {
-            this.years.push(year);
-        }
-
-        this.data = this.years.map(year => {
-            const yearData = organizations.map(org => ({
-                organization: org.name,
-                image: org.image,
-                value: Math.floor(Math.random() * 1000000) + 100000 + (year - 2020) * 50000,
-                year: year
-            }));
-
-            // Sort by value and take top performers
-            yearData.sort((a, b) => b.value - a.value);
-            
-            return {
-                year: year,
-                data: yearData.slice(0, Math.min(this.options.maxBars, yearData.length))
-            };
-        });
-
-        // Update slider
-        this.container.select('.year-slider')
-            .attr('max', this.years.length - 1);
-
-        // Initial render
-        this.updateChart();
-    }
-
-    loadData(csvData) {
-        try {
-            // Parse CSV data
-            const parsed = d3.csvParse(csvData);
-            
-            if (!parsed || parsed.length === 0) {
-                throw new Error('No data found in CSV');
-            }
-
-            // Group by year
-            const dataByYear = {};
-            parsed.forEach(row => {
-                const year = +row.Year;
-                if (!dataByYear[year]) {
-                    dataByYear[year] = [];
-                }
-                dataByYear[year].push({
-                    organization: row.Organization,
-                    image: row.Image || `https://via.placeholder.com/40x40/0078d4/ffffff?text=${row.Organization.charAt(0)}`,
-                    value: +row.Value,
-                    year: year
-                });
-            });
-
-            // Sort years and prepare data
-            this.years = Object.keys(dataByYear).map(Number).sort();
-            this.data = this.years.map(year => ({
-                year: year,
-                data: dataByYear[year]
-                    .sort((a, b) => b.value - a.value)
-                    .slice(0, Math.min(this.options.maxBars, dataByYear[year].length))
-            }));
-
-            // Update slider
-            this.container.select('.year-slider')
-                .attr('max', this.years.length - 1);
-
-            // Reset and render
-            this.currentYearIndex = 0;
-            this.updateChart();
-            
-            console.log('Data loaded successfully:', this.data.length, 'years');
-            
-        } catch (error) {
-            console.error('Error loading data:', error);
-            alert('Error loading CSV data. Please check the format and try again.');
-        }
-    }
-
-    updateChart() {
-        if (!this.data || this.data.length === 0) return;
-
-        const currentData = this.data[this.currentYearIndex];
-        const maxValue = d3.max(currentData.data, d => d.value);
-
-        // Update scales
-        this.xScale.domain([0, maxValue]);
-        this.yScale.domain(d3.range(currentData.data.length));
-
-        // Update year display
-        this.updateYearDisplay(currentData.year);
-
-        // Bind data
-        const bars = this.chartGroup.selectAll('.bar')
-            .data(currentData.data, d => d.organization);
-
-        const images = this.chartGroup.selectAll('.org-image')
-            .data(currentData.data, d => d.organization);
-
-        const labels = this.chartGroup.selectAll('.org-label')
-            .data(currentData.data, d => d.organization);
-
-        const valueLabels = this.chartGroup.selectAll('.value-label')
-            .data(currentData.data, d => d.organization);
-
-        const rankLabels = this.chartGroup.selectAll('.rank-label')
-            .data(currentData.data, d => d.organization);
-
-        // Enter new bars
-        bars.enter()
-            .append('rect')
-            .attr('class', 'bar')
-            .attr('x', 0)
-            .attr('y', (d, i) => this.yScale(i))
-            .attr('width', 0)
-            .attr('height', this.yScale.bandwidth())
-            .attr('fill', (d, i) => this.options.colors[i % this.options.colors.length])
-            .attr('rx', 6)
-            .attr('ry', 6)
-            .merge(bars)
-            .transition()
-            .duration(this.options.animationDuration)
-            .attr('y', (d, i) => this.yScale(i))
-            .attr('width', d => this.xScale(d.value))
-            .attr('fill', (d, i) => this.options.colors[i % this.options.colors.length]);
+// Complete the truncated chart.js file
+// Add this to complete the updateChart method and add missing methods
 
         // Handle image loading with fallback
         images.enter()
@@ -213,4 +18,193 @@ class BarChartRace {
             .transition()
             .duration(this.options.animationDuration)
             .attr('x', d => this.xScale(d.value) + 15)
-            .attr('y', (d, i) => this.yScale(i) + (this.yScale.bandwidth() -
+            .attr('y', (d, i) => this.yScale(i) + (this.yScale.bandwidth() - 40) / 2)
+            .attr('href', d => d.image);
+
+        // Organization labels
+        labels.enter()
+            .append('text')
+            .attr('class', 'org-label')
+            .attr('x', d => this.xScale(d.value) + 65)
+            .attr('y', (d, i) => this.yScale(i) + this.yScale.bandwidth() / 2 - 8)
+            .attr('text-anchor', 'left')
+            .attr('alignment-baseline', 'middle')
+            .style('font-size', '16px')
+            .style('fill', '#333')
+            .text(d => d.organization)
+            .merge(labels)
+            .transition()
+            .duration(this.options.animationDuration)
+            .attr('x', d => this.xScale(d.value) + 65)
+            .attr('y', (d, i) => this.yScale(i) + this.yScale.bandwidth() / 2 - 8)
+            .text(d => d.organization);
+
+        // Value labels
+        valueLabels.enter()
+            .append('text')
+            .attr('class', 'value-label')
+            .attr('x', d => this.xScale(d.value) + 65)
+            .attr('y', (d, i) => this.yScale(i) + this.yScale.bandwidth() / 2 + 12)
+            .attr('text-anchor', 'left')
+            .attr('alignment-baseline', 'middle')
+            .style('font-size', '14px')
+            .style('fill', '#666')
+            .text(d => this.formatValue(d.value))
+            .merge(valueLabels)
+            .transition()
+            .duration(this.options.animationDuration)
+            .attr('x', d => this.xScale(d.value) + 65)
+            .attr('y', (d, i) => this.yScale(i) + this.yScale.bandwidth() / 2 + 12)
+            .text(d => this.formatValue(d.value));
+
+        // Rank labels
+        rankLabels.enter()
+            .append('text')
+            .attr('class', 'rank-label')
+            .attr('x', -10)
+            .attr('y', (d, i) => this.yScale(i) + this.yScale.bandwidth() / 2)
+            .attr('text-anchor', 'end')
+            .attr('alignment-baseline', 'middle')
+            .style('fill', '#999')
+            .text((d, i) => i + 1)
+            .merge(rankLabels)
+            .transition()
+            .duration(this.options.animationDuration)
+            .attr('y', (d, i) => this.yScale(i) + this.yScale.bandwidth() / 2)
+            .text((d, i) => i + 1);
+
+        // Remove old elements
+        bars.exit().remove();
+        images.exit().remove();
+        labels.exit().remove();
+        valueLabels.exit().remove();
+        rankLabels.exit().remove();
+    }
+
+    updateYearDisplay(year) {
+        this.container.select('.year-display').text(year);
+        this.container.select('.current-year').text(year);
+        this.container.select('.year-slider').property('value', this.currentYearIndex);
+    }
+
+    formatValue(value) {
+        if (value >= 1000000) {
+            return (value / 1000000).toFixed(1) + 'M';
+        } else if (value >= 1000) {
+            return (value / 1000).toFixed(1) + 'K';
+        }
+        return value.toLocaleString();
+    }
+
+    play() {
+        if (this.isPlaying) return;
+        
+        this.isPlaying = true;
+        this.container.select('.btn-icon').text('⏸');
+        this.container.select('.btn-text').text('Pause');
+        
+        this.animationTimer = setInterval(() => {
+            this.currentYearIndex = (this.currentYearIndex + 1) % this.years.length;
+            this.updateChart();
+            
+            if (this.currentYearIndex === 0) {
+                this.pause();
+            }
+        }, this.options.yearDuration);
+    }
+
+    pause() {
+        this.isPlaying = false;
+        this.container.select('.btn-icon').text('▶');
+        this.container.select('.btn-text').text('Play');
+        
+        if (this.animationTimer) {
+            clearInterval(this.animationTimer);
+            this.animationTimer = null;
+        }
+    }
+
+    goToYear(yearIndex) {
+        this.currentYearIndex = Math.max(0, Math.min(yearIndex, this.years.length - 1));
+        this.updateChart();
+    }
+
+    setupEventListeners() {
+        // Play/Pause button
+        this.container.select('.play-pause-btn').on('click', () => {
+            if (this.isPlaying) {
+                this.pause();
+            } else {
+                this.play();
+            }
+        });
+
+        // Year slider
+        this.container.select('.year-slider').on('input', (event) => {
+            this.pause();
+            this.goToYear(parseInt(event.target.value));
+        });
+
+        // Settings toggle
+        this.container.select('.settings-btn').on('click', () => {
+            const content = this.container.select('.settings-content');
+            content.classed('active', !content.classed('active'));
+        });
+
+        // Click outside to close settings
+        document.addEventListener('click', (event) => {
+            const settingsPanel = this.container.select('.settings-panel').node();
+            if (!settingsPanel.contains(event.target)) {
+                this.container.select('.settings-content').classed('active', false);
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            this.handleResize();
+        });
+    }
+
+    handleResize() {
+        const containerNode = this.container.node();
+        this.width = containerNode.clientWidth;
+        this.height = containerNode.clientHeight;
+        this.chartWidth = this.width - this.margin.left - this.margin.right;
+        this.chartHeight = this.height - this.margin.top - this.margin.bottom;
+        
+        this.svg.attr('width', this.width).attr('height', this.height);
+        this.xScale.range([0, this.chartWidth - 150]);
+        this.yScale.range([0, this.chartHeight]);
+        
+        this.updateChart();
+    }
+
+    setBackgroundImage(imageUrl) {
+        if (imageUrl) {
+            this.container.select('.background-image')
+                .style('background-image', `url(${imageUrl})`)
+                .style('background-size', 'cover')
+                .style('background-position', 'center');
+        } else {
+            this.container.select('.background-image')
+                .style('background-image', 'url(\'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGRlZnM+CjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPgo8cGF0aCBkPSJNIDEwIDAgTCAwIDAgMCAxMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTBlMGUwIiBzdHJva2Utd2lkdGg9IjEiLz4KPC9wYXR0ZXJuPgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz4KPC9zdmc+\')')
+                .style('background-size', '20px 20px');
+        }
+    }
+
+    setCornerImage(imageUrl) {
+        if (imageUrl) {
+            this.container.select('.corner-image')
+                .style('background-image', `url(${imageUrl})`)
+                .style('background-size', 'contain');
+        }
+    }
+
+    setAnimationSpeed(speed) {
+        this.options.yearDuration = parseInt(speed);
+        if (this.isPlaying) {
+            this.pause();
+            this.play();
+        }
+    }
+}
