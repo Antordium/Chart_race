@@ -1,0 +1,24 @@
+{
+  "name": "bar-chart-race",
+  "version": "1.0.0",
+  "description": "Interactive D3.js Bar Chart Race with customizable features",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site - no build needed'",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "d3",
+    "chart",
+    "race",
+    "visualization",
+    "powerbi"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}
