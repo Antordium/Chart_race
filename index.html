@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 </head>
 <body>
-    <div class="chart-container">
+    <div id="chart-container" class="chart-container">
         <div class="background-image"></div>
         <div class="corner-image"></div>
         
@@ -61,6 +61,10 @@
                 <div class="setting-group">
                     <label>Upload CSV Data:</label>
                     <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload(this.files[0])">
+                    <button onclick="downloadSampleCSV()">Download Sample CSV</button>
+                </div>
+                <div class="setting-group">
+                    <button onclick="exportChart()">Export as SVG</button>
                 </div>
             </div>
         </div>
