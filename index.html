@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive D3.js Bar Chart Race with customizable features">
+    <meta name="keywords" content="d3, chart, race, visualization, powerbi">
+    <title>Bar Chart Race - Interactive Data Visualization</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+    <div id="chart-container" class="chart-container">
+        <div class="background-image"></div>
+        <div class="corner-image"></div>
+        
+        <!-- Editable Title -->
+        <div class="chart-title" contenteditable="true" spellcheck="false">
+            Organization Performance Race
+        </div>
+        
+        <svg class="chart-svg"></svg>
+        
+        <div class="controls">
+            <button class="play-pause-btn">
+                <span class="btn-icon">▶</span>
+                <span class="btn-text">Play</span>
+            </button>
+            <input type="range" class="year-slider" min="0" max="0" value="0">
+            <span class="year-label">Year: <span class="current-year">2020</span></span>
+        </div>
+        
+        <div class="year-display">2020</div>
+        
+        <div class="loading">Loading data...</div>
+        
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <button class="settings-btn">⚙️</button>
+            <div class="settings-content">
+                <h3>Customization</h3>
+                <div class="setting-group">
+                    <label>Background Image URL:</label>
+                    <input type="text" id="bgImageUrl" placeholder="Enter image URL">
+                    <button onclick="chart.setBackgroundImage(document.getElementById('bgImageUrl').value)">Apply</button>
+                </div>
+                <div class="setting-group">
+                    <label>Corner Logo URL:</label>
+                    <input type="text" id="cornerImageUrl" placeholder="Enter image URL">
+                    <button onclick="chart.setCornerImage(document.getElementById('cornerImageUrl').value)">Apply</button>
+                </div>
+                <div class="setting-group">
+                    <label>Time Between Years:</label>
+                    <select id="animationSpeed" onchange="chart.setAnimationSpeed(this.value)">
+                        <option value="500">Ultra Fast (0.5s)</option>
+                        <option value="1000">Fast (1s)</option>
+                        <option value="2000">Medium (2s)</option>
+                        <option value="3000" selected>Slow (3s)</option>
+                        <option value="5000">Very Slow (5s)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Bar Transition Speed:</label>
+                    <select id="transitionSpeed" onchange="chart.setTransitionSpeed(this.value)">
+                        <option value="200">Instant (0.2s)</option>
+                        <option value="500">Quick (0.5s)</option>
+                        <option value="1000" selected>Smooth (1s)</option>
+                        <option value="1500">Slow (1.5s)</option>
+                        <option value="2000">Very Slow (2s)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Playback Modes:</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="setNormalSpeed()" style="flex: 1;">Normal</button>
+                        <button onclick="setFastSpeed()" style="flex: 1;">Fast</button>
+                        <button onclick="toggleTurboMode()" id="turboBtn" style="flex: 1;">Turbo 🚀</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Rapid Mode (for dense data):</label>
+                    <select id="rapidMode" onchange="chart.setRapidMode(this.value)">
+                        <option value="0">Off</option>
+                        <option value="100">Ultra Rapid (100ms)</option>
+                        <option value="200">Very Rapid (200ms)</option>
+                        <option value="300">Rapid (300ms)</option>
+                        <option value="500">Quick (500ms)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Upload CSV Data:</label>
+                    <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload(this.files[0])">
+                    <button onclick="downloadSampleCSV()">Download Sample CSV</button>
+                </div>
+                <div class="setting-group">
+                    <button onclick="exportChart()">Export as SVG</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/chart.js"></script>
+    <script src="assets/main.js"></script>
+</body>
+</html>

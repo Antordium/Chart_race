@@ -1,0 +1,369 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f5f5;
+    overflow: hidden;
+}
+
+.chart-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGRlZnM+CjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPgo8cGF0aCBkPSJNIDEwIDAgTCAwIDAgMCAxMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTBlMGUwIiBzdHJva2Utd2lkdGg9IjEiLz4KPC9wYXR0ZXJuPgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz4KPC9zdmc+');
+    background-size: 20px 20px;
+    opacity: 0.3;
+    z-index: -1;
+    transition: background-image 0.3s ease;
+}
+
+.corner-image {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 120px;
+    height: 120px;
+    background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjUwIiBmaWxsPSIjMDA3OGQ0IiBvcGFjaXR5PSIwLjciLz4KPHN2ZyB4PSIzMCIgeT0iMzAiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CjxwYXRoIGQ9Ik0yMCAxMGwxMCAxMEwxMCAzMEwwIDIweiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTQwIDEwbDEwIDEwTDQwIDMwTDMwIDIweiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTIwIDMwbDEwIDEwTDIwIDUwTDEwIDQweiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTQwIDMwbDEwIDEwTDQwIDUwTDMwIDQweiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cjwvc3ZnPg==') no-repeat center;
+    background-size: contain;
+    z-index: 10;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: background-image 0.3s ease;
+}
+
+.chart-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.controls {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    backdrop-filter: blur(10px);
+}
+
+.play-pause-btn {
+    background: linear-gradient(135deg, #0078d4, #106ebe);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0,120,212,0.3);
+}
+
+.play-pause-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,120,212,0.4);
+}
+
+.play-pause-btn:active {
+    transform: translateY(0);
+}
+
+.year-slider {
+    width: 250px;
+    height: 8px;
+    border-radius: 4px;
+    background: #e0e0e0;
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+.year-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #0078d4;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.year-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #0078d4;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.year-label {
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+.year-display {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    font-size: 72px;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.15);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    z-index: 5;
+    font-family: 'Segoe UI', sans-serif;
+    letter-spacing: -2px;
+    pointer-events: none;
+}
+
+.chart-title {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    z-index: 5;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: text;
+    outline: none;
+}
+
+.chart-title:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(0, 120, 212, 0.3);
+}
+
+.chart-title:focus {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #0078d4;
+    box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
+}
+
+.chart-title::selection {
+    background: #0078d4;
+    color: white;
+}
+
+.settings-panel {
+    position: absolute;
+    top: 20px;
+    right: 160px;
+    z-index: 15;
+}
+
+.settings-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    padding: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.settings-btn:hover {
+    transform: rotate(90deg);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.settings-content {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+    min-width: 300px;
+    display: none;
+    animation: slideIn 0.3s ease;
+}
+
+.settings-content.active {
+    display: block;
+}
+
+.settings-content h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.setting-group {
+    margin-bottom: 15px;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #666;
+}
+
+.setting-group input,
+.setting-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.setting-group button {
+    background: #0078d4;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.3s ease;
+}
+
+.setting-group button:hover {
+    background: #106ebe;
+}
+
+.bar {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.bar:hover {
+    opacity: 0.8;
+}
+
+.org-image {
+    border-radius: 50%;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.org-label {
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.value-label {
+    font-weight: 500;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.rank-label {
+    font-weight: 700;
+    font-size: 18px;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: #666;
+    z-index: 15;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .year-display {
+        font-size: 48px;
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .chart-title {
+        font-size: 24px;
+        top: 15px;
+        left: 15px;
+    }
+    
+    .controls {
+        bottom: 15px;
+        left: 15px;
+        padding: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .year-slider {
+        width: 150px;
+    }
+    
+    .settings-panel {
+        top: 15px;
+        right: 15px;
+    }
+    
+    .settings-content {
+        min-width: 250px;
+        right: -100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-title {
+        font-size: 20px;
+        padding: 8px 12px;
+    }
+    
+    .year-display {
+        font-size: 36px;
+    }
+    
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .year-slider {
+        width: 100%;
+    }
+}
